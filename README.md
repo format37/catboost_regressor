@@ -1,13 +1,15 @@
 ### Catboost regressor model train, predict and call python from 1c
 
 ## install:
-
+```
 git clone https://github.com/format37/1c_ml_regression_diagnostics.git
 sudo chmod -R 777 cgi-bin/
+```
 
 ## run server:
-
+```
 sh start.sh
+```
 
 ## request to server:
 ```
