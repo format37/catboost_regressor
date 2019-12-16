@@ -1,4 +1,4 @@
-### catboost regressor model train and predict and call python from 1c
+### Catboost regressor model train, predict and call python from 1c
 
 ## install:
 
