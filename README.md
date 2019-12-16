@@ -1,4 +1,4 @@
-### Diagnostics duration train and prediction using catboost regressor and return to 1c
+### catboost regressor model train and predict and call python from 1c
 
 ## install:
 
