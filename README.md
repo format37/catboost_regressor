@@ -2,6 +2,10 @@
 
 ## install:
 ```
+sudo su
+pip3 install pandas --user
+pip3 install Cython --user
+pip3 install catboost --user
 git clone https://github.com/format37/1c_ml_regression_diagnostics.git
 sudo chmod -R 777 cgi-bin/
 ```
