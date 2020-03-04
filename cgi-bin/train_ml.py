@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-# alter table regression convert to character set utf8mb4 collate utf8mb4_unicode_ci
-# ALTER TABLE regression MODIFY value LONGTEXT
 import cgi
-import pymysql.cursors
+#import pymysql.cursors #MySql
+import pymssql			#MsSql
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -12,26 +11,35 @@ print("Content-type: text/html")
 print()
 
 # LOAD TABLE FROM SQL
-ServerName='localhost'
-Database='ml'
-username = '1c'
-password = 'mTh!^z!2dqy5d-.Rc7Yc'
+ServerName='10.2.4.25'
+Database='1c_python'
+username = 'ICECORP\\1csystem'
+password = '0dKasn@ms+'
 
-con = pymysql.connect(ServerName, username, password, Database)
+#con = pymysql.connect(ServerName, username, password, Database)
+con	= pymssql.connect(ServerName, username, password, Database)
 form = cgi.FieldStorage(keep_blank_values=1)
 
-request=form['request'].value
-modelName=form['model'].value
-cat_features=form['cat_features'].value.split(',')
+modelName		= form['model'].value
+request			= form['request'].value
+in_iter_count	= int(form['iter_count'].value)
+in_learning_rate= float(form['learning_rate'].value)
+in_depth		= int(form['depth'].value)
+in_data_file	= form['data_file'].value
+cat_features	= form['cat_features'].value
+
 if len(cat_features)==0:
-	cat_features=None
+	cat_features	= None
+else:
+	cat_features	= cat_features.split(',')
 
 with con:
 	cur = con.cursor()
-
 	query="select row,field,value from regression where request='"+request+"' order by row,field;"
 	cur.execute(query)
 	data_source = pd.read_sql(query, con=con)
+	if len(in_data_file)>0:
+		data_source.to_csv(in_data_file)
 	fields_count=max(data_source['field'])+1
 	columns=tuple('field_'+str(i) for i in range(0,int(fields_count)))
 	data = pd.DataFrame([])
@@ -54,32 +62,15 @@ with con:
 	print('y_train: ',len(y_train))
 	print('y_validation: ',len(y_validation))
 	X_test = test_df.drop('field_0', axis=1)
-	model1 = CatBoostRegressor(iterations=2000,
-							   learning_rate=0.01,
-							   depth=16,
+	model1 = CatBoostRegressor(iterations=in_iter_count,
+							   learning_rate=in_learning_rate,
+							   depth=in_depth,
 							   cat_features=cat_features,
-							   metric_period=100
+							   metric_period=int(in_iter_count/10) if int(in_iter_count/10)>0 else 1
 							   )
 	model1.fit(X_train, y_train)
-	print('best iteration: ',str(model1.get_best_iteration()))
-	print('best score: ',str(model1.get_best_score()))
 	print('final score: ')
 	print(str(model1.score(X,y)))
-	'''
-	model2 = CatBoostRegressor(iterations=1000,
-							   learning_rate=0.1,
-							   depth=4,
-							   cat_features=cat_features)
-	model2.fit(X_train, y_train, init_model=model1)
-	'''
 	model1.save_model(modelName)
-	
-	res = model.calc_feature_statistics(X_train,
-                                    y_train,
-                                    feature=4,
-                                    plot=True)
-	
 	query="delete from regression where request='"+request+"';"
 	cur.execute(query)
-	
-	file = open('train.log', 'w')
