@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 #http://10.2.4.87:8000/cgi-bin/feature_importance.py?model=cgi-bin/composite_test_bid
 import cgi
 import pymysql.cursors

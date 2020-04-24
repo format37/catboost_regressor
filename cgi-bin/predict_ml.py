@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import cgi
 import pymssql
 import pandas as pd
@@ -14,7 +14,7 @@ print("Content-type: text/html")
 print()
 
 # LOAD TABLE FROM SQL
-ServerName='10.2.4.25'
+ServerName='10.2.4.124'
 Database='1c_python'
 username = 'ICECORP\\1csystem'
 password = '0dKasn@ms+'
