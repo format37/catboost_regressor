@@ -8,7 +8,8 @@ import cgi
 import pymssql
 import pandas as pd
 import numpy as np
-from catboost import CatBoostRegressor
+from catboost import CatBoostRegressor, Pool
+from catboost.utils import eval_metric
 from sklearn.model_selection import train_test_split
 import time
 from sqlalchemy import create_engine
@@ -39,12 +40,12 @@ async def predict(request):
 	
 	try:
 		modelName="/home/alex/projects/1c_ml_regression_diagnostics/cgi-bin/"+request.rel_url.query['model']	
-	except:
+	except Exception as e:
 		send_to_telegram(telegram_group,str(datetime.datetime.now())+' predict error: "model" parameter not received')
 	
 	try:
 		request=request.rel_url.query['request']	
-	except:
+	except Exception as e:
 		send_to_telegram(telegram_group,str(datetime.datetime.now())+' predict error: "request" parameter not received')
 	
 	#load data from sql
@@ -59,6 +60,10 @@ async def predict(request):
 		
 		#read
 		data_source = pd.read_sql(query, con=con)
+		
+		#debug save to file
+		data_source.to_csv('/home/alex/projects/1c_ml_regression_diagnostics/cgi-bin/data/pred.csv')
+		
 		fields_count=max(data_source['field'])
 		new_columns=tuple('field_'+str(i) for i in range(1,int(fields_count)+1))
 		data = pd.DataFrame([])
@@ -73,12 +78,7 @@ async def predict(request):
 		#predict		
 		model = CatBoostRegressor()
 		model.load_model(modelName)
-		pred = model.predict(data, 
-				ntree_start=0, 
-				ntree_end=0, 
-				thread_count=-1,
-				verbose=True)
-		
+		pred = model.predict(data)
 		#insert
 		df = pd.DataFrame({'pred':pred})
 		df.columns = ['value']
@@ -111,12 +111,12 @@ async def train(request):
 		send_to_telegram(telegram_group,str(datetime.datetime.now())+' train error: "request" parameter not received')
 		
 	try:
-		in_iter_count=request.rel_url.query['iter_count']	
+		in_iter_count=int(request.rel_url.query['iter_count'])
 	except:
 		send_to_telegram(telegram_group,str(datetime.datetime.now())+' train error: "iter_count" parameter not received')
 		
 	try:
-		in_learning_rate=request.rel_url.query['learning_rate']	
+		in_learning_rate=float(request.rel_url.query['learning_rate'])
 	except:
 		send_to_telegram(telegram_group,str(datetime.datetime.now())+' train error: "learning_rate" parameter not received')
 		
@@ -143,7 +143,10 @@ async def train(request):
 			cat_features	= None
 		else:
 			cat_features	= cat_features.split(',')
-			
+		target='field_0'
+		
+		#load data from sql
+		ServerName, Database, username, password = sql_params()			
 		con	= pymssql.connect(ServerName, username, password, Database)
 		
 		step+=1
@@ -169,42 +172,65 @@ async def train(request):
 			data.reset_index(drop=True, inplace=True)
 			data.fillna(0,inplace=True)
 			data=data.sample(n=len(data))
-			msk = np.random.rand(len(data)) < 0.75
-			train_df = data[msk]
-			test_df = data[~msk]
-			X = train_df.drop('field_0', axis=1)
-			y=train_df.field_0
-			X_train, X_validation, y_train, y_validation = train_test_split(X, y, train_size=0.75, random_state=42)
-			print('y: ',len(y))
-			print('y_train: ',len(y_train))
-			print('y_validation: ',len(y_validation))
+			
+			#msk = np.random.rand(len(data)) < 0.75
+			#train_df = data[msk]
+			#test_df = data[~msk]
+			#X = train_df.drop('field_0', axis=1)
+			#y=train_df.field_0
+			#X_train, X_validation, y_train, y_validation = train_test_split(X, y, train_size=0.75, #random_state=42)
+			
+			X=data.drop('field_0', axis=1)
+			y=data.field_0
+			X_train, X_validation, y_train, y_validation = train_test_split(X, y, train_size=0.75, random_state=42)			
+			content+='y: '+str(len(y))+'\n'
+			content+='y_train: '+str(len(y_train))+'\n'
+			content+='y_validation: '+str(len(y_validation))+'\n'
 			step+=1
 			
-			X_test = test_df.drop('field_0', axis=1)
-			model1 = CatBoostRegressor(iterations=in_iter_count,
-									   learning_rate=in_learning_rate,
-									   depth=in_depth,
-									   cat_features=cat_features,
-									   metric_period=int(in_iter_count/10) if int(in_iter_count/10)>0 else 1
-									   )
-			model1.fit(X_train, y_train)			
-			print('final score: ')
-			print(str(model1.score(X,y)))
+			#X_test = test_df.drop('field_0', axis=1)
+			eval_dataset = Pool(data=X_validation,
+                    label=y_validation,
+                    cat_features=cat_features)
+			
+			# model1 = CatBoostRegressor(iterations=in_iter_count,
+									   # learning_rate=in_learning_rate,
+									   # depth=int(in_depth),
+									   # cat_features=cat_features,
+									   # metric_period=int(in_iter_count/10) if int(in_iter_count/10)>0 else 1
+									   # )
+			model1 = CatBoostRegressor(
+				cat_features=cat_features,
+				boost_from_average=True,
+				score_function = 'NewtonL2',
+				one_hot_max_size = 512,
+				)
+			#model1.fit(X_train, y_train)
+			model1.fit(X_train, y_train,use_best_model = True,eval_set=eval_dataset)
+			pred = model1.predict(X_validation)			
+			params = model1.get_params()
+			content+=str(params)+'\n'
+			content+='\n'+params['loss_function']+' loss: '+ str(eval_metric(y_validation.to_numpy(), pred, params['loss_function']))
+			content+='\nFitted: '+str(model1.is_fitted())
+			content+='\nModel score:\n'+str(model1.score(X,y))
 			step+=1
 			model1.save_model(modelName)
 			query="delete from regression where request='"+request_id+"';"
 			cur.execute(query)
 	
-	except:
-		send_to_telegram(telegram_group,str(datetime.datetime.now())+' train error: step '+step)
+	except Exception as e:
+		send_to_telegram(telegram_group,str(datetime.datetime.now())+' train error: step '+str(step)+'\n'+str(e))
 	
 	return web.Response(text=content,content_type="text/html")
 	
 async def importance(request):
+	
+	print(str(datetime.datetime.now())+' importance requested')
+	
 	content = ''
 	
 	try:
-		modelName="/home/alex/projects/1c_ml_regression_diagnostics/cgi-bin/"+request.rel_url.query['model']	
+		modelName="/home/alex/projects/1c_ml_regression_diagnostics/cgi-bin/"+request.rel_url.query['model']
 	except:
 		send_to_telegram(telegram_group,str(datetime.datetime.now())+' train error: "model" parameter not received')
 	
@@ -215,7 +241,7 @@ async def importance(request):
 
 		fi=[i for i in model.get_feature_importance(type="FeatureImportance")]
 		for i in range(len(fi)):
-			content+='field_'+str(i+1)+','+str(fi[i])
+			content+=('' if len(content)==0 else ' ')+'field_'+str(i+1)+','+str(fi[i])
 	except:
 		send_to_telegram(telegram_group,str(datetime.datetime.now())+' feature importance call error')
 		
