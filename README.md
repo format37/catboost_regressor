@@ -3,7 +3,7 @@
 ## mysql db prepare
 ```
 sudo mysql -u root
-CREATE USER '1c'@'localhost' IDENTIFIED BY 'mTh!^z!2dqy5d-.Rc7Yc';
+CREATE USER '1c'@'localhost' IDENTIFIED BY 'PASS';
 GRANT ALL PRIVILEGES ON * . * TO '1c'@'localhost';
 FLUSH PRIVILEGES;
 exit
@@ -68,7 +68,7 @@ sudo nano /etc/mysql/my.cnf
 sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 comment bind-address = 127.0.0.1 using the # symbol
 
-CREATE USER '1c'@'%' IDENTIFIED BY 'E9/`%;W|e84#:UVg/L`c';
+CREATE USER '1c'@'%' IDENTIFIED BY 'PASS';
 GRANT ALL PRIVILEGES ON *.* TO '1c'@'%';
 FLUSH PRIVILEGES;
 
