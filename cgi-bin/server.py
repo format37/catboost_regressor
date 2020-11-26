@@ -22,10 +22,13 @@ def sql_params():
     ServerName='10.2.4.124'
     Database='1c_python'
     username = 'ICECORP\\1csystem'
-    password = '0dKasn@ms+'
+    with open('/home/alex/projects/1c_ml_regression_diagnostics/cgi-bin/sql.pass','r') as file:
+		password		= file.read().replace('\n', '')
+		file.close()
     return ServerName, Database, username, password
 
 def send_to_telegram(chat,message):
+    print('sending to telegram:',message)
     headers = {
         "Origin": "http://scriptlab.net",
         "Referer": "http://scriptlab.net/telegram/bots/relaybot/",
@@ -48,9 +51,12 @@ async def predict(request):
     except Exception as e:
         send_to_telegram(telegram_group,str(datetime.datetime.now())+' predict error: "request" parameter not received')
 
-    #load data from sql
-    ServerName, Database, username, password = sql_params()	
-    con	= pymssql.connect(ServerName, username, password, Database)
+    try:
+        #load data from sql
+        ServerName, Database, username, password = sql_params()	
+        con	= pymssql.connect(ServerName, username, password, Database)
+    except Exception as e:
+        send_to_telegram(telegram_group,str(datetime.datetime.now())+' error: '+str(e))
 
     with con:
 
@@ -144,7 +150,7 @@ async def train(request):
         else:
             cat_features	= cat_features.split(',')
         target='field_0'
-
+        
         #load data from sql
         ServerName, Database, username, password = sql_params()			
         con	= pymssql.connect(ServerName, username, password, Database)
