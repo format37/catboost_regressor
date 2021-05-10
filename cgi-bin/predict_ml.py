@@ -16,8 +16,8 @@ print()
 # LOAD TABLE FROM SQL
 ServerName='10.2.4.124'
 Database='1c_python'
-username = 'ICECORP\\1csystem'
-password = '0dKasn@ms+'
+username = 'domain\\user'
+password = 'pass'
 
 with open("logs/log-"+str(time.strftime("%Y%m%d-%H%M%S"))+".txt", "w") as log_file:
 
