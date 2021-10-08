@@ -54,7 +54,7 @@ async def call_inference(request):
 	engine = create_engine('mssql+pymssql://'+username+':'+password+'@'+ServerName+'/'+Database)
 	sql_df.to_sql('regression', con=engine, if_exists='append', index=False)"""
 
-	responce = df.to_string()
+	response = df.to_string()
 
 	return web.Response(text=str(response),content_type="text/html")
 
