@@ -28,7 +28,7 @@ async def call_inference(request):
 	df = pd.read_csv(StringIO(csv_text), sep=';')
 
 	#debug save to file
-	df.to_csv('data/inference_in.csv')
+	df.to_csv('volume/inference_in.csv')
 
 	# model name	
 	modelName=df.model.iloc()[0]

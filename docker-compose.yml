@@ -3,6 +3,8 @@ services:
   server:
     restart: always
     build: server
+    volumes:
+      - /home/alex/projects/1c_ml_regression_diagnostics/server/volume:/server/volume
     ports:
       - 8082:8082
     environment:
