@@ -27,7 +27,7 @@ async def call_inference(request):
 
 	# drop params columns
 	df.drop([
-		'Unnamed: 0',
+		#'Unnamed: 0',
 		'model',
 		'iterations_count',
 		'learning_rate',
