@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  server:
+    restart: always
+    build: server
+    ports:
+      - 8082:8082
+    environment:
+      - PORT=8082
