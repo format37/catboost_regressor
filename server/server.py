@@ -31,8 +31,8 @@ async def call_inference(request):
 	df.to_csv('volume/inference_in.csv')
 
 	# model name	
-	modelName=df.model.iloc()[0]
-	df.drop('model', axis=1, inplace=True)
+	#modelName=df.model.iloc()[0]
+	#df.drop('model', axis=1, inplace=True)
 		
 	# query="select row,field,value from regression where request='"+request+"' order by row,field;"
 
