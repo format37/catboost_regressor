@@ -10,6 +10,18 @@ async def call_test(request):
 
 
 async def call_inference(request):
+
+	response = 'ok'
+
+	"""хттпЗапрос	= Элемент.АдресСкриптаОбучения
+			+"?model="+Элемент.Модель			
+			+"&request="+ид_запроса
+			+"&iter_count="+Элемент.КоличествоИтераций
+			+"&learning_rate="+Формат(Элемент.КоэффициентОбучения,"ЧРД=.; ЧН=; ЧГ=")
+			+"&depth="+Элемент.ГлубинаОбуения
+			+"&data_file="+Элемент.ФайлДанных
+			+"&cat_features="+КатегориальныеПризнаки;
+		А_Серверные.ВыполнитьHTTPЗапросПолучитьОтвет(хттпЗапрос,Ответ,Элемент.ТаймаутЗапроса,Ложь);"""
 	
 	# read csv request as pandas df
 	csv_text = str(await request.text()).replace('\ufeff', '')
@@ -27,28 +39,21 @@ async def call_inference(request):
 	#read
 	# data_source = pd.read_sql(query, con=con)
 
-	fields_count=max(df['field'])
+	"""fields_count=max(df['field'])
 	new_columns=tuple('field_'+str(i) for i in range(1,int(fields_count)+1))
-	data = pd.DataFrame([])
+	data = pd.DataFrame([])"""
 
-	#rotate
-	for row in range (0,max(df['row'])+1):
-		temp=pd.DataFrame(df[df.row==row]['value']).transpose()
-		temp=temp.drop(temp.columns[0], axis=1)
-		temp.set_axis(new_columns, axis='columns', inplace=True)
-		data = data.append(temp,ignore_index = True)
-
-	#predict		
+	"""#predict		
 	model = CatBoostRegressor()
 	model.load_model(modelName)
 	pred = model.predict(data)
 	#insert
 	df = pd.DataFrame({'pred':pred})
-	df.columns = ['value']
+	df.columns = ['value']"""
 
-	#save to sql
-	rows=data_source[data_source.field==0].row.reset_index(drop=True)
-	predict_field=max(data_source.field)+1
+	"""#save to sql
+	rows=df[df.field==0].row.reset_index(drop=True)
+	predict_field=max(df.field)+1
 	sql_df=pd.DataFrame({
 		'row':rows,
 		'field':[predict_field for i in range(0,len(rows))],
@@ -56,7 +61,7 @@ async def call_inference(request):
 		'request':[request for i in range(0,len(rows))]
 	})
 	engine = create_engine('mssql+pymssql://'+username+':'+password+'@'+ServerName+'/'+Database)
-	sql_df.to_sql('regression', con=engine, if_exists='append', index=False)
+	sql_df.to_sql('regression', con=engine, if_exists='append', index=False)"""
 
 	# return web.Response(text=content,content_type="text/html")
 
