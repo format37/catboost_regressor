@@ -11,18 +11,6 @@ async def call_test(request):
 
 async def call_inference(request):
 
-	response = 'ok'
-
-	"""хттпЗапрос	= Элемент.АдресСкриптаОбучения
-			+"?model="+Элемент.Модель			
-			+"&request="+ид_запроса
-			+"&iter_count="+Элемент.КоличествоИтераций
-			+"&learning_rate="+Формат(Элемент.КоэффициентОбучения,"ЧРД=.; ЧН=; ЧГ=")
-			+"&depth="+Элемент.ГлубинаОбуения
-			+"&data_file="+Элемент.ФайлДанных
-			+"&cat_features="+КатегориальныеПризнаки;
-		А_Серверные.ВыполнитьHTTPЗапросПолучитьОтвет(хттпЗапрос,Ответ,Элемент.ТаймаутЗапроса,Ложь);"""
-	
 	# read csv request as pandas df
 	csv_text = str(await request.text()).replace('\ufeff', '')
 	df = pd.read_csv(StringIO(csv_text), sep=';')
@@ -30,18 +18,21 @@ async def call_inference(request):
 	#debug save to file
 	df.to_csv('volume/inference_in.csv')
 
-	# model name	
-	#modelName=df.model.iloc()[0]
-	#df.drop('model', axis=1, inplace=True)
-		
-	# query="select row,field,value from regression where request='"+request+"' order by row,field;"
+	# read params
+	first_row = df.iloc()[0]
+	model = first_row.model
+	iterations_count = first_row.iterations_count
+	learning_rate = first_row.learning_rate
+	depth = first_row.depth
 
-	#read
-	# data_source = pd.read_sql(query, con=con)
-
-	"""fields_count=max(df['field'])
-	new_columns=tuple('field_'+str(i) for i in range(1,int(fields_count)+1))
-	data = pd.DataFrame([])"""
+	# drop params columns
+	df.drop([
+		'Unnamed: 0',
+		'model',
+		'iterations_count',
+		'learning_rate',
+		'depth'
+	], axis=1, inplace=True)
 
 	"""#predict		
 	model = CatBoostRegressor()
@@ -63,8 +54,7 @@ async def call_inference(request):
 	engine = create_engine('mssql+pymssql://'+username+':'+password+'@'+ServerName+'/'+Database)
 	sql_df.to_sql('regression', con=engine, if_exists='append', index=False)"""
 
-	# return web.Response(text=content,content_type="text/html")
-
+	responce = df.to_string()
 
 	return web.Response(text=str(response),content_type="text/html")
 
