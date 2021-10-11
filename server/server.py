@@ -15,14 +15,14 @@ async def call_train(request):
 
 	response = ''
 
-	def cat_columns(in_cat_features, in_columns):
+	"""def cat_columns(in_cat_features, in_columns):
 		in_cat_features = in_cat_features.replace('cat','')
 		out_columns = []
 		for key in range(len(in_cat_features)):
 			print(key)
 			if in_cat_features[key] == '1':
 				out_columns.append(in_columns[key])
-		return out_columns
+		return out_columns"""
 
 	# read csv request as pandas df
 	csv_text = str(await request.text()).replace('\ufeff', '')
@@ -33,7 +33,8 @@ async def call_train(request):
 	# read params
 	first_row = df.iloc()[0]
 	model_name = first_row.model
-	cat_features = first_row.cat_features
+	cat_features = first_row.cat_features.split(',')
+	print('cat_features', cat_features)
 
 	# drop params columns
 	df.drop([
@@ -44,8 +45,8 @@ async def call_train(request):
 
 	# define dataset
 	X = df.drop(df.columns[0], axis=1)
-	cat_features = cat_columns(cat_features, X.columns)
-	print('cat_features', cat_features)
+	#cat_features = cat_columns(cat_features, X.columns)
+	#print('cat_features', cat_features)
 	y = df[df.columns[0]]
 	X_train, X_validation, y_train, y_validation = train_test_split(X, y, train_size=0.75, random_state=42)			
 	response += 'y: '+str(len(y))+'\n'
