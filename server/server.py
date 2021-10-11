@@ -5,6 +5,7 @@ from io import StringIO
 from catboost import CatBoostRegressor, Pool
 from catboost.utils import eval_metric
 from sklearn.model_selection import train_test_split
+import numpy as np
 
 async def call_test(request):
 	content = "ok"
@@ -33,6 +34,8 @@ async def call_train(request):
 		'model',
 		'cat_features'
 	], axis=1, inplace=True)
+
+	df.replace(np.nan, 'nan', inplace = True)
 
 	# define dataset
 	X = df.drop(df.columns[0], axis=1)
