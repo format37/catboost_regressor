@@ -2,25 +2,97 @@ from aiohttp import web
 import os
 import pandas as pd
 from io import StringIO
-from catboost import CatBoostRegressor
+from catboost import CatBoostRegressor, Pool
+from catboost.utils import eval_metric
+from sklearn.model_selection import train_test_split
 
 async def call_test(request):
-	content = "get ok"
+	content = "ok"
 	return web.Response(text=content,content_type="text/html")
 
 
-async def call_inference(request):
+async def call_train(request):
+
+	response = ''
+
+	def cat_columns(cat_features, in_columns):
+		out_columns = []
+		for key in range(len(cat_features)):
+			print(key)
+			if cat_features[key] == '1':
+				out_columns.append(in_columns[key])
+		return out_columns
 
 	# read csv request as pandas df
 	csv_text = str(await request.text()).replace('\ufeff', '')
 	df = pd.read_csv(StringIO(csv_text), sep=';')
 
-	#debug save to file
-	df.to_csv('volume/inference_in.csv')
+	df.to_csv('data/in_train.csv') # TODO: remove this debug saver
 
 	# read params
 	first_row = df.iloc()[0]
-	model = first_row.model
+	model_name = first_row.model
+	cat_features = first_row.cat_features
+
+	# drop params columns
+	df.drop([
+		#'Unnamed: 0',
+		'model',
+		'cat_features'
+	], axis=1, inplace=True)
+
+	# define dataset
+	X = df.drop(df.columns[0], axis=1)
+	cat_features = cat_columns(cat_features, X.columns)
+	y = df[df.columns[0]]
+	X_train, X_validation, y_train, y_validation = train_test_split(X, y, train_size=0.75, random_state=42)			
+	response += 'y: '+str(len(y))+'\n'
+	response += 'y_train: '+str(len(y_train))+'\n'
+	response += 'y_validation: '+str(len(y_validation))+'\n'
+	eval_dataset = Pool(data=X_validation,
+			label=y_validation,
+			cat_features=cat_features)
+
+	# define model
+	model = CatBoostRegressor(
+		cat_features=cat_features,
+		boost_from_average=True,
+		score_function = 'NewtonL2',
+		one_hot_max_size = 512,
+		depth = 16,
+		langevin = True,
+		posterior_sampling=True,
+		model_shrink_rate = 1/(2*len(y_train)),
+		verbose=False
+		)
+
+	# train
+	model.fit(X_train, y_train, use_best_model=True, eval_set=eval_dataset)
+	
+	# evaluate model score
+	pred = model.predict(X_validation)
+	params = model.get_params()
+	response += str(params)+'\n'
+	response += '\n'+params['loss_function']+' loss: '+ str(eval_metric(y_validation.to_numpy(), pred, params['loss_function']))
+	response += '\nFitted: '+str(model.is_fitted())
+	response += '\nModel score:\n'+str(model.score(X,y))
+	
+	# save model
+	model.save_model('data/'+model_name)
+
+	return web.Response(text=str(response),content_type="text/html")
+
+
+async def call_inference(request):
+	# read csv request as pandas df
+	csv_text = str(await request.text()).replace('\ufeff', '')
+	df = pd.read_csv(StringIO(csv_text), sep=';')
+
+	df.to_csv('data/inference_in.csv') # TODO: remove this debug saver
+
+	# read params
+	first_row = df.iloc()[0]
+	model_name = first_row.model
 	iterations_count = first_row.iterations_count
 	learning_rate = first_row.learning_rate
 	depth = first_row.depth
@@ -58,11 +130,18 @@ async def call_inference(request):
 
 	return web.Response(text=str(response),content_type="text/html")
 
-app = web.Application(client_max_size=1024**3)
-app.router.add_route('GET', '/test', call_test)
-app.router.add_post('/inference', call_inference)
 
-web.run_app(
-    app,
-    port=os.environ.get('PORT', ''),
-)
+def main():
+	app = web.Application(client_max_size=1024**3)
+	app.router.add_route('GET', '/test', call_test)
+	app.router.add_post('/inference', call_inference)
+	app.router.add_post('/train', call_train)
+
+	web.run_app(
+		app,
+		port=os.environ.get('PORT', ''),
+	)
+
+
+if __name__ == "__main__":
+    main()

@@ -4,7 +4,7 @@ services:
     restart: always
     build: server
     volumes:
-      - /home/alex/projects/1c_ml_regression_diagnostics/server/volume:/server/volume
+      - /home/alex/projects/1c_ml_regression_diagnostics/server/data:/server/data
     ports:
       - 8082:8082
     environment:
