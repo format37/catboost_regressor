@@ -44,6 +44,7 @@ async def call_train(request):
 	# define dataset
 	X = df.drop(df.columns[0], axis=1)
 	cat_features = cat_columns(cat_features, X.columns)
+	print('cat_features', cat_features)
 	y = df[df.columns[0]]
 	X_train, X_validation, y_train, y_validation = train_test_split(X, y, train_size=0.75, random_state=42)			
 	response += 'y: '+str(len(y))+'\n'
