@@ -15,11 +15,12 @@ async def call_train(request):
 
 	response = ''
 
-	def cat_columns(cat_features, in_columns):
+	def cat_columns(in_cat_features, in_columns):
+		in_cat_features = in_cat_features.replace('cat','')
 		out_columns = []
-		for key in range(len(cat_features)):
+		for key in range(len(in_cat_features)):
 			print(key)
-			if cat_features[key] == '1':
+			if in_cat_features[key] == '1':
 				out_columns.append(in_columns[key])
 		return out_columns
 
@@ -36,7 +37,7 @@ async def call_train(request):
 
 	# drop params columns
 	df.drop([
-		#'Unnamed: 0',
+		'Unnamed: 0',
 		'model',
 		'cat_features'
 	], axis=1, inplace=True)
