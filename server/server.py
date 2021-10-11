@@ -52,7 +52,7 @@ async def call_train(request):
 	model = CatBoostRegressor(
 		cat_features=cat_features,
 		boost_from_average=True,
-		score_function = 'NewtonL2',
+		#score_function = 'NewtonL2',
 		one_hot_max_size = 512,
 		depth = 16,
 		langevin = True,
