@@ -35,7 +35,7 @@ async def call_train(request):
 	model_name = first_row.model
 	cat_features = first_row.cat_features.split(',')
 	print('cat_features', cat_features)
-
+	return web.Response(text=str(response),content_type="text/html")
 	# drop params columns
 	df.drop([
 		#'Unnamed: 0',
