@@ -37,7 +37,7 @@ async def call_train(request):
 
 	# drop params columns
 	df.drop([
-		'Unnamed: 0',
+		#'Unnamed: 0',
 		'model',
 		'cat_features'
 	], axis=1, inplace=True)
