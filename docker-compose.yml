@@ -9,3 +9,4 @@ services:
       - 8082:8082
     environment:
       - PORT=8082
+      - USE_GPU=1

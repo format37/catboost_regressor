@@ -48,19 +48,32 @@ async def call_train(request):
 			label=y_validation,
 			cat_features=cat_features)
 
+	
 	# define model
-	model = CatBoostRegressor(
-		cat_features=cat_features,
-		boost_from_average=True,
-		#score_function = 'NewtonL2',
-		one_hot_max_size = 512,
-		depth = 16,
-		langevin = True,
-		posterior_sampling=True,
-		model_shrink_rate = 1/(2*len(y_train)),
-		verbose=False,
-		task_type="GPU"
-		)
+	if os.environ.get('USE_GPU', '0') == '1':
+		model = CatBoostRegressor(
+			cat_features=cat_features,
+			boost_from_average=True,
+			#score_function = 'NewtonL2',
+			one_hot_max_size = 256,
+			depth = 16,
+			langevin = True,
+			posterior_sampling=True,
+			verbose=False,
+			task_type="GPU"
+			)
+	else:
+		model = CatBoostRegressor(
+			cat_features=cat_features,
+			boost_from_average=True,
+			#score_function = 'NewtonL2',
+			one_hot_max_size = 512,
+			depth = 16,
+			langevin = True,
+			posterior_sampling=True,
+			model_shrink_rate = 1/(2*len(y_train)),
+			verbose=False,
+			)
 
 	# train
 	model.fit(X_train, y_train, use_best_model=True, eval_set=eval_dataset)
