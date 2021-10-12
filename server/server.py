@@ -102,9 +102,7 @@ async def call_inference(request):
 	model = CatBoostRegressor()
 	model.load_model('data/'+model_name)
 	df[df.columns[0]+'_predicted'] = model.predict(X)
-
-	#response = df.to_string()
-	response  = df.to_csv()
+	response  = df.to_csv(sep=';')
 
 	return web.Response(text=response,content_type="text/html")
 
