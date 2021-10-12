@@ -9,7 +9,7 @@ services:
       - 8082:8082
     environment:
       - PORT=8082
-      - USE_GPU=1
+      - USE_GPU=0
     deploy:
       resources:
         reservations:
