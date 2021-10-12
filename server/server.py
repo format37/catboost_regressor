@@ -58,7 +58,7 @@ async def call_train(request):
 			one_hot_max_size = 256,
 			depth = 16,
 			langevin = True,
-			posterior_sampling=True,
+			#posterior_sampling=True,
 			verbose=False,
 			task_type="GPU"
 			)
