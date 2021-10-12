@@ -6,15 +6,13 @@ from catboost import CatBoostRegressor, Pool
 from catboost.utils import eval_metric
 from sklearn.model_selection import train_test_split
 import numpy as np
+import asyncio
 
 async def call_test(request):
 	content = "ok"
 	return web.Response(text=content,content_type="text/html")
 
-
-async def call_train(request):
-	response = ''
-
+async def prepare_data(request):
 	# read csv request as pandas df
 	csv_text = str(await request.text()).replace('\ufeff', '')
 	df = pd.read_csv(StringIO(csv_text), sep=';')
@@ -25,7 +23,6 @@ async def call_train(request):
 	first_row = df.iloc()[0]
 	model_name = first_row.model
 	cat_features = first_row.cat_features.split(',')
-	print('cat_features', cat_features)
 	
 	# drop params columns
 	df.drop([
@@ -39,6 +36,14 @@ async def call_train(request):
 	# define dataset
 	X = df.drop(df.columns[0], axis=1)
 	y = df[df.columns[0]]
+	return df, X, y, cat_features, model_name
+
+
+async def call_train(request):
+	response = ''
+
+	df, X, y, cat_features, model_name = asyncio.get_event_loop().run_until_complete(prepare_data(request))
+
 	X_train, X_validation, y_train, y_validation = train_test_split(X, y, train_size=0.75, random_state=42)			
 	response += 'y: '+str(len(y))+'\n'
 	response += 'y_train: '+str(len(y_train))+'\n'
@@ -92,7 +97,7 @@ async def call_train(request):
 
 
 async def call_inference(request):
-	response = ''
+	"""response = ''
 
 	# read csv request as pandas df
 	csv_text = str(await request.text()).replace('\ufeff', '')
@@ -103,20 +108,21 @@ async def call_inference(request):
 	# read params
 	first_row = df.iloc()[0]
 	model_name = first_row.model
-	#cat_features = first_row.cat_features.split(',')
+	cat_features = first_row.cat_features.split(',')
 	#print('cat_features', cat_features)
 	
 	# drop params columns
 	df.drop([
 		#'Unnamed: 0',
 		'model',
-		#'cat_features'
+		'cat_features'
 	], axis=1, inplace=True)
 
 	df.replace(np.nan, 'nan', inplace = True)
 
 	# prepare dataset
-	X = df.drop(df.columns[0], axis=1)
+	X = df.drop(df.columns[0], axis=1)"""
+	df, X, y, cat_features, model_name = asyncio.get_event_loop().run_until_complete(prepare_data(request))
 
 	#predict
 	model = CatBoostRegressor()
