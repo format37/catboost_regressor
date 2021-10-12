@@ -10,10 +10,10 @@ services:
     environment:
       - PORT=8082
       - USE_GPU=0
-    deploy:
+    """deploy:
       resources:
         reservations:
           devices:
           - driver: nvidia
             device_ids: ['0']
-            capabilities: [gpu]
+            capabilities: [gpu]"""
