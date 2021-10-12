@@ -17,7 +17,7 @@ def prepare_data(request, csv_text):
 	df = pd.read_csv(StringIO(csv_text), sep=';')
 
 	# debug save to csv
-	df.to_csv('data/in_inference.csv', sep=';')
+	# df.to_csv('data/in_inference.csv', sep=';')
 
 	# read and drop params
 	first_row = df.iloc()[0]
@@ -106,6 +106,9 @@ async def call_inference(request):
 	model.load_model('data/'+model_name)
 	df[df.columns[0]+'_predicted'] = model.predict(X)
 	response  = df.to_csv(sep=';')
+	
+	# debug save to csv
+	df.to_csv('data/out_inference.csv', sep=';')
 
 	return web.Response(text=response,content_type="text/html")
 
