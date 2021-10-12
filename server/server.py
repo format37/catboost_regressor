@@ -107,8 +107,8 @@ async def call_inference(request):
 	df[df.columns[0]+'_predicted'] = model.predict(X)
 	
 	# df.drop(df.columns[0], axis=1, inplace=True)
-	df.drop(df.columns['Unnamed: 0'], axis=1, inplace=True)
-	response  = df.to_csv(sep=';')
+	# df.drop(df.columns['Unnamed: 0'], axis=1, inplace=True)
+	response  = df.to_csv(sep=';', index = False)
 	
 	# debug save to csv
 	df.to_csv('data/out_inference.csv', sep=';')
