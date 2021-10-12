@@ -13,7 +13,6 @@ async def call_test(request):
 
 
 async def call_train(request):
-
 	response = ''
 
 	# read csv request as pandas df
@@ -93,51 +92,41 @@ async def call_train(request):
 
 
 async def call_inference(request):
+	response = ''
+
 	# read csv request as pandas df
 	csv_text = str(await request.text()).replace('\ufeff', '')
 	df = pd.read_csv(StringIO(csv_text), sep=';')
 
-	df.to_csv('data/inference_in.csv') # TODO: remove this debug saver
+	df.to_csv('data/in_train.csv') # TODO: remove this debug saver
 
 	# read params
 	first_row = df.iloc()[0]
 	model_name = first_row.model
-	iterations_count = first_row.iterations_count
-	learning_rate = first_row.learning_rate
-	depth = first_row.depth
-
+	#cat_features = first_row.cat_features.split(',')
+	#print('cat_features', cat_features)
+	
 	# drop params columns
 	df.drop([
 		#'Unnamed: 0',
 		'model',
-		'iterations_count',
-		'learning_rate',
-		'depth'
+		#'cat_features'
 	], axis=1, inplace=True)
 
-	"""#predict		
+	df.replace(np.nan, 'nan', inplace = True)
+
+	# prepare dataset
+	X = df.drop(df.columns[0], axis=1)
+
+	#predict
 	model = CatBoostRegressor()
-	model.load_model(modelName)
-	pred = model.predict(data)
-	#insert
-	df = pd.DataFrame({'pred':pred})
-	df.columns = ['value']"""
+	model.load_model('data/'+model_name)
+	df[df.columns[0]+'_predicted'] = model.predict(X)
 
-	"""#save to sql
-	rows=df[df.field==0].row.reset_index(drop=True)
-	predict_field=max(df.field)+1
-	sql_df=pd.DataFrame({
-		'row':rows,
-		'field':[predict_field for i in range(0,len(rows))],
-		'value':df.value,
-		'request':[request for i in range(0,len(rows))]
-	})
-	engine = create_engine('mssql+pymssql://'+username+':'+password+'@'+ServerName+'/'+Database)
-	sql_df.to_sql('regression', con=engine, if_exists='append', index=False)"""
+	#response = df.to_string()
+	response  = df.to_csv()
 
-	response = df.to_string()
-
-	return web.Response(text=str(response),content_type="text/html")
+	return web.Response(text=response,content_type="text/html")
 
 
 def main():
