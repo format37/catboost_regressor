@@ -58,7 +58,8 @@ async def call_train(request):
 		langevin = True,
 		posterior_sampling=True,
 		model_shrink_rate = 1/(2*len(y_train)),
-		verbose=False
+		verbose=False,
+		task_type="GPU"
 		)
 
 	# train
