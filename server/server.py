@@ -16,6 +16,9 @@ async def call_test(request):
 def prepare_data(request, csv_text):
 	df = pd.read_csv(StringIO(csv_text), sep=';')
 
+	# debug save to csv
+	df.to_csv('data/in_inference.csv', sep=';')
+
 	# read and drop params
 	first_row = df.iloc()[0]
 	model_name = first_row.model
