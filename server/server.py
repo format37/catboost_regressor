@@ -98,7 +98,7 @@ async def call_inference(request):
 	csv_text = str(await request.text()).replace('\ufeff', '')
 	df = pd.read_csv(StringIO(csv_text), sep=';')
 
-	df.to_csv('data/in_train.csv') # TODO: remove this debug saver
+	df.to_csv('data/in_inference.csv') # TODO: remove this debug saver
 
 	# read params
 	first_row = df.iloc()[0]
