@@ -12,9 +12,7 @@ async def call_test(request):
 	content = "ok"
 	return web.Response(text=content,content_type="text/html")
 
-async def prepare_data(request):
-	# read csv request as pandas df
-	csv_text = str(await request.text()).replace('\ufeff', '')
+def prepare_data(request, csv_text):
 	df = pd.read_csv(StringIO(csv_text), sep=';')
 
 	df.to_csv('data/in_train.csv') # TODO: remove this debug saver
@@ -42,7 +40,11 @@ async def prepare_data(request):
 async def call_train(request):
 	response = ''
 
-	df, X, y, cat_features, model_name = asyncio.get_event_loop().run_until_complete(prepare_data(request))
+	# read csv request
+	csv_text = str(await request.text()).replace('\ufeff', '')
+
+	#df, X, y, cat_features, model_name = asyncio.get_event_loop().run_until_complete(prepare_data(request))
+	df, X, y, cat_features, model_name = prepare_data(request, csv_text)
 
 	X_train, X_validation, y_train, y_validation = train_test_split(X, y, train_size=0.75, random_state=42)			
 	response += 'y: '+str(len(y))+'\n'
@@ -122,7 +124,13 @@ async def call_inference(request):
 
 	# prepare dataset
 	X = df.drop(df.columns[0], axis=1)"""
-	df, X, y, cat_features, model_name = asyncio.get_event_loop().run_until_complete(prepare_data(request))
+	response = ''
+
+	# read csv request
+	csv_text = str(await request.text()).replace('\ufeff', '')
+
+	#df, X, y, cat_features, model_name = asyncio.get_event_loop().run_until_complete(prepare_data(request))
+	df, X, y, cat_features, model_name = prepare_data(request, csv_text)
 
 	#predict
 	model = CatBoostRegressor()
