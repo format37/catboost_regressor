@@ -5,9 +5,12 @@ services:
     build: server
     volumes:
       - /home/alex/projects/1c_ml_regression_diagnostics/server/data:/server/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - 8082:8082
     environment:
+      - TZ=Europe/Moscow
       - PORT=8082
       - USE_GPU=0
     #deploy:
