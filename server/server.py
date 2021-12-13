@@ -44,7 +44,7 @@ async def call_train(request):
 	
 	# debug ++	
 	#try:
-	with open('data/in_train.dat', w) as f:
+	with open('data/in_train.dat', 'w') as f:
 		f.write(csv_text)
 	#except Exception as e:
 	#	print('debug save train data error:', str(e))
