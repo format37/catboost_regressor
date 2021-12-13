@@ -43,11 +43,11 @@ async def call_train(request):
 	csv_text = str(await request.text()).replace('\ufeff', '')
 	
 	# debug ++	
-	try:
-		with open('in_train.dat') as f:
-			f.write(csv_text)
-	except Exception as e:
-		print('debug save train data error:', str(e))
+	#try:
+	with open('data/in_train.dat', w) as f:
+		f.write(csv_text)
+	#except Exception as e:
+	#	print('debug save train data error:', str(e))
 	# debug --
 
 	df, X, y, cat_features, model_name = prepare_data(request, csv_text)
