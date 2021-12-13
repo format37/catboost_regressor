@@ -17,7 +17,7 @@ def prepare_data(request, csv_text):
 	df = pd.read_csv(StringIO(csv_text), sep=';')
 
 	# debug save to csv
-	# df.to_csv('data/in_inference.csv', sep=';')
+	df.to_csv('data/in_inference.csv', sep=';')
 
 	# read and drop params
 	first_row = df.iloc()[0]
@@ -41,6 +41,14 @@ async def call_train(request):
 
 	# read csv request
 	csv_text = str(await request.text()).replace('\ufeff', '')
+	
+	# debug ++	
+	try:
+		with open('in_train.dat') as f:
+			f.write(csv_text)
+	except Exception as e:
+		print('debug save train data error:', str(e))
+	# debug --
 
 	df, X, y, cat_features, model_name = prepare_data(request, csv_text)
 
