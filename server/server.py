@@ -13,11 +13,11 @@ async def call_test(request):
 	return web.Response(text=content,content_type="text/html")
 
 
-def prepare_data(request, csv_text):
+def prepare_data(csv_text):
 	df = pd.read_csv(StringIO(csv_text), sep=';')
 
 	# debug save to csv
-	df.to_csv('data/in_inference.csv', sep=';')
+	#df.to_csv('data/in_inference.csv', sep=';')
 
 	# read and drop params
 	first_row = df.iloc()[0]
@@ -44,13 +44,13 @@ async def call_train(request):
 	
 	# debug ++	
 	#try:
-	with open('data/in_train.dat', 'w') as f:
-		f.write(csv_text)
+	#with open('data/in_train.dat', 'w') as f:
+	#	f.write(csv_text)
 	#except Exception as e:
 	#	print('debug save train data error:', str(e))
 	# debug --
 
-	df, X, y, cat_features, model_name = prepare_data(request, csv_text)
+	df, X, y, cat_features, model_name = prepare_data(csv_text)
 
 	X_train, X_validation, y_train, y_validation = train_test_split(X, y, train_size=0.75, random_state=42)			
 	response += 'y: '+str(len(y))+'\n'
@@ -107,7 +107,7 @@ async def call_inference(request):
 	# read csv request
 	csv_text = str(await request.text()).replace('\ufeff', '')
 
-	df, X, y, cat_features, model_name = prepare_data(request, csv_text)
+	df, X, y, cat_features, model_name = prepare_data(csv_text)
 
 	# predict
 	model = CatBoostRegressor()
