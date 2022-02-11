@@ -13,6 +13,10 @@ services:
       - TZ=Europe/Moscow
       - PORT=8082
       - USE_GPU=0
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     #deploy:
     #  resources:
     #    reservations:
