@@ -115,7 +115,9 @@ async def call_train(request):
     response += '\nFeature importance:'
     importance = model.get_feature_importance()
     for i in range(len(model.feature_names_)):
-        responce += '\n'+str(np.round(importance[i],2), model.feature_names_[i])
+        response += '\n'+str(np.round(importance[i],2), model.feature_names_[i])
+
+    response = str(eval_metric(y_validation.to_numpy(), pred, params['loss_function'])[0]) + '\n' + response
     
     # save model
     model.save_model('data/'+model_name)
