@@ -113,9 +113,12 @@ async def call_train(request):
     response += '\nFitted: '+str(model.is_fitted())
     response += '\nModel score:\n'+str(model.score(X,y))
     response += '\nFeature importance:'
-    importance = model.get_feature_importance()
-    for i in range(len(model.feature_names_)):
-        response += '\n'+str(np.round(importance[i],2), model.feature_names_[i])
+    try:
+        importance = model.get_feature_importance()
+        for i in range(len(model.feature_names_)):
+            response += '\n'+str(np.round(importance[i],2), model.feature_names_[i])
+    except Exception as e:
+        response += '\n'+str(e)       
 
     response = str(eval_metric(y_validation.to_numpy(), pred, params['loss_function'])[0]) + '\n' + response
     
