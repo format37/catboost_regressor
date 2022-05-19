@@ -116,7 +116,7 @@ async def call_train(request):
     try:
         importance = model.get_feature_importance()
         for i in range(len(model.feature_names_)):
-            response += '\n'+str(np.round(importance[i],2), model.feature_names_[i])
+            response += '\n'+str(np.round(importance[i],2)) + ' ' + model.feature_names_[i]
     except Exception as e:
         response += '\n'+str(e)       
 
