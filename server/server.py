@@ -136,15 +136,15 @@ async def call_inference(request):
 
     df, X, y, cat_features, model_name, log_txt = prepare_data(csv_text, False)
 
+    # debug save to csv
+    df.to_csv('data/out_inference.csv', sep=';')
+
     # predict
     model = CatBoostRegressor()
     model.load_model('data/'+model_name)
     df[df.columns[0]+'_predicted'] = model.predict(X)
     
     response  = df.to_csv(sep=';', index = False)
-    
-    # debug save to csv
-    # df.to_csv('data/out_inference.csv', sep=';')
 
     return web.Response(text=response,content_type="text/html")
 
