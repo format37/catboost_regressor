@@ -18,7 +18,8 @@ def prepare_data(csv_text, drop_outliers=True):
     df = pd.read_csv(StringIO(csv_text), sep=';')
 
     # debug save to csv
-    df.to_csv('data/in_inference.csv', sep=';')
+    #df.to_csv('data/in_inference.csv', sep=';')
+    df.to_csv('data/in_inference.csv')
 
     # read and drop params
     first_row = df.iloc()[0]
