@@ -18,7 +18,7 @@ def prepare_data(csv_text, drop_outliers=True):
     df = pd.read_csv(StringIO(csv_text), sep=';')
 
     # debug save to csv
-    #df.to_csv('data/in_inference.csv', sep=';')
+    df.to_csv('data/in_inference.csv', sep=';')
 
     # read and drop params
     first_row = df.iloc()[0]
@@ -137,7 +137,7 @@ async def call_inference(request):
     df, X, y, cat_features, model_name, log_txt = prepare_data(csv_text, False)
 
     # debug save to csv
-    df.to_csv('data/out_inference.csv', sep=';')
+    # df.to_csv('data/out_inference.csv', sep=';')
 
     # predict
     model = CatBoostRegressor()
