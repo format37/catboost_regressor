@@ -134,7 +134,7 @@ async def call_inference(request):
     # read csv request
     csv_text = str(await request.text()).replace('\ufeff', '')
 
-    df, X, y, cat_features, model_name, log_txt = prepare_data(csv_text)
+    df, X, y, cat_features, model_name, log_txt = prepare_data(csv_text, False)
 
     # predict
     model = CatBoostRegressor()
