@@ -1,1 +1,1 @@
-### Catboost regressor model call train and inference from 1c
+### Catboost regressor docker server
