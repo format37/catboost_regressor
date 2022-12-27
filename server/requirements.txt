@@ -2,4 +2,5 @@ aiohttp
 catboost
 pandas
 sklearn
+scikit-learn
 numpy
